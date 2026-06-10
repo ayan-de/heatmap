@@ -2,7 +2,8 @@ import { ContributionData, HeatmapOptions } from './types.js';
 import { computeHeatmapGrid, renderHeatmap } from './renderer.js';
 import { colorize } from './color.js';
 
-export function startInteractiveHeatmap(data: ContributionData[], options: HeatmapOptions = {}) {
+export function startInteractiveHeatmap(data: ContributionData[], options: HeatmapOptions = {}): Promise<void> {
+  return new Promise((resolve) => {
   const showDayLabels = options.dayLabels !== false;
   const leftPaddingWidth = showDayLabels ? 4 : 0;
 
@@ -37,6 +38,7 @@ export function startInteractiveHeatmap(data: ContributionData[], options: Heatm
       process.stdin.setRawMode(false);
     }
     process.stdin.pause();
+    process.stdin.removeListener('data', onData);
   }
 
   function onResize() {
@@ -101,13 +103,14 @@ export function startInteractiveHeatmap(data: ContributionData[], options: Heatm
     }
   }
 
-  process.stdin.on('data', (chunk) => {
+  const onData = (chunk: any) => {
     const str = chunk.toString();
 
     // Check for exit keys: Ctrl+C (charCode 3), standalone Escape (charCode 27), 'q', 'Q'
     if (str === '\x1b' || str === 'q' || str === 'Q' || str.includes('\x03')) {
       cleanup();
-      process.exit(0);
+      resolve();
+      return;
     }
 
     stdinBuffer += str;
@@ -132,5 +135,8 @@ export function startInteractiveHeatmap(data: ContributionData[], options: Heatm
     if (lastMouse) {
       handleHover(lastMouse.x, lastMouse.y);
     }
+  };
+
+  process.stdin.on('data', onData);
   });
 }

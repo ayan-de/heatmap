@@ -93,7 +93,7 @@ async function run() {
     };
 
     if (opts.interactive) {
-      startInteractiveHeatmap(contributions, heatmapOptions);
+      await startInteractiveHeatmap(contributions, heatmapOptions);
     } else {
       const output = renderHeatmap(contributions, heatmapOptions);
       console.log('\n' + output + '\n');
