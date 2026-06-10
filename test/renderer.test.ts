@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { renderHeatmap, formatDateKey } from '../src/renderer.js';
+import { renderHeatmap, formatDateKey, computeHeatmapGrid } from '../src/renderer.js';
 import { ContributionData } from '../src/types.js';
 
 describe('Renderer Core', () => {
@@ -99,4 +99,34 @@ describe('Renderer Core', () => {
     expect(output).toContain('Sat');
   });
 });
+
+describe('Grid Computation', () => {
+  it('should compute the correct grid metadata', () => {
+    const data: ContributionData[] = [
+      { date: '2023-06-10', count: 5 },
+      { date: '2023-06-11', count: 12 },
+    ];
+    const grid = computeHeatmapGrid(data, {
+      startDate: '2023-06-01',
+      endDate: '2023-06-30',
+    });
+
+    expect(grid.columns.length).toBeGreaterThan(0);
+    expect(grid.q25).toBeDefined();
+    expect(grid.q50).toBeDefined();
+    expect(grid.q75).toBeDefined();
+    
+    // Find the cell for 2023-06-10
+    const flatCells = grid.columns.flat();
+    const cell10 = flatCells.find(c => c.dateStr === '2023-06-10');
+    expect(cell10).toBeDefined();
+    expect(cell10?.count).toBe(5);
+    expect(cell10?.level).toBeGreaterThan(0);
+
+    const cell11 = flatCells.find(c => c.dateStr === '2023-06-11');
+    expect(cell11).toBeDefined();
+    expect(cell11?.count).toBe(12);
+  });
+});
+
 
