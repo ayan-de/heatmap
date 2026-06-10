@@ -37,6 +37,8 @@
   ],
   "author": "Ayan De",
   "license": "MIT",
+  "repository": "github:ayan-de/heatmap",
+  "homepage": "https://github.com/ayan-de/heatmap#readme",
   "devDependencies": {
     "@types/node": "^20.19.42",
     "tsup": "^8.0.2",
