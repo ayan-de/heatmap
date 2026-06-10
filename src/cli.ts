@@ -29,7 +29,7 @@ async function run() {
     .name('terminal-heatmap')
     .description('Visualize activity and contributions as a beautiful GitHub-like heatmap in your terminal.')
     .option('--theme <name>', 'Theme to use', 'github-green')
-    .option('--char <char>', 'Symbol to use for each cell', '■')
+    .option('--char <char>', 'Symbol to use for each cell')
     .option('--start <date>', 'Start date (YYYY-MM-DD)')
     .option('--end <date>', 'End date (YYYY-MM-DD)')
     .option('--title <text>', 'Add a title above the heatmap')
@@ -39,6 +39,7 @@ async function run() {
     .option('--no-day', 'Hide day labels')
     .option('--all-days', 'Show labels for all days of the week (defaults to Mon/Wed/Fri only)')
     .option('-i, --interactive', 'Interactive mode with mouse hover support')
+    .option('--preset <preset>', 'Cell preset style: classic, double-block, emoji')
     .requiredOption('--json <file>', 'Load contribution data from a JSON file (format: [{"date":"YYYY-MM-DD","count":number}]) — pass "-" to read from stdin');
 
   const opts = program.parse(process.argv).opts();
@@ -81,6 +82,7 @@ async function run() {
       allDayLabels: opts.allDays,
       title: opts.title ?? 'Contribution Heatmap',
       startDayOfWeek: (opts.monday ? 1 : 0) as 0 | 1,
+      preset: opts.preset,
     };
 
     if (opts.interactive) {
