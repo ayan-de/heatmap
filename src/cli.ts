@@ -3,6 +3,7 @@
 import { readFileSync } from 'fs';
 import { Command } from 'commander';
 import { renderHeatmap } from './renderer.js';
+import { startInteractiveHeatmap } from './interactive.js';
 import { ThemeName } from './types.js';
 
 function readFromStdin(): Promise<string> {
@@ -37,6 +38,7 @@ async function run() {
     .option('--no-month', 'Hide month labels')
     .option('--no-day', 'Hide day labels')
     .option('--all-days', 'Show labels for all days of the week (defaults to Mon/Wed/Fri only)')
+    .option('-i, --interactive', 'Interactive mode with mouse hover support')
     .requiredOption('--json <file>', 'Load contribution data from a JSON file (format: [{"date":"YYYY-MM-DD","count":number}]) — pass "-" to read from stdin');
 
   const opts = program.parse(process.argv).opts();
@@ -68,7 +70,7 @@ async function run() {
       }
     }
 
-    const output = renderHeatmap(contributions, {
+    const heatmapOptions = {
       startDate: renderStart,
       endDate: renderEnd,
       theme: opts.theme as ThemeName,
@@ -78,10 +80,15 @@ async function run() {
       dayLabels: opts.day,
       allDayLabels: opts.allDays,
       title: opts.title ?? 'Contribution Heatmap',
-      startDayOfWeek: opts.monday ? 1 : 0,
-    });
+      startDayOfWeek: (opts.monday ? 1 : 0) as 0 | 1,
+    };
 
-    console.log('\n' + output + '\n');
+    if (opts.interactive) {
+      startInteractiveHeatmap(contributions, heatmapOptions);
+    } else {
+      const output = renderHeatmap(contributions, heatmapOptions);
+      console.log('\n' + output + '\n');
+    }
   } catch (error: any) {
     console.error(`Error: ${error.message}`);
     process.exit(1);
