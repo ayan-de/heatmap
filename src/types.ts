@@ -18,6 +18,12 @@ export interface ThemeColors {
   colors: string[];
 }
 
+export interface CellPreset {
+  getChar(level: number): string;
+  isEmoji?: boolean;
+  charWidth: number;
+}
+
 export interface HeatmapGrid {
   columns: Cell[][];
   displayColumns: Cell[][];
@@ -26,6 +32,7 @@ export interface HeatmapGrid {
   q50: number;
   q75: number;
   countKey: string;
+  preset: CellPreset;
 }
 
 
@@ -88,4 +95,7 @@ export interface HeatmapOptions {
   
   /** The key in the JSON objects representing the count/value. Defaults to auto-detected or 'count'. */
   countKey?: string;
+
+  /** Preset style to use for cells ('classic', 'double-block', 'emoji') */
+  preset?: string;
 }
