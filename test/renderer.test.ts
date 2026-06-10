@@ -118,6 +118,42 @@ describe('Renderer Core', () => {
     });
     expect(output).toContain('🌱');
   });
+
+  it('should support custom 4-emoji array', () => {
+    const data = [
+      { date: '2023-01-05', count: 1 },
+      { date: '2023-01-06', count: 2 },
+      { date: '2023-01-07', count: 3 },
+      { date: '2023-01-08', count: 4 },
+      { date: '2023-01-09', count: 5 },
+    ];
+    const output = renderHeatmap(data, {
+      startDate: '2023-01-01',
+      endDate: '2023-01-20',
+      emojis: ['🔴', '🟡', '🔵', '🟢'],
+      legend: false,
+    });
+    expect(output).toContain('⚪');
+    expect(output).toContain('🟢');
+  });
+
+  it('should support custom 5-emoji array', () => {
+    const data = [
+      { date: '2023-01-05', count: 1 },
+      { date: '2023-01-06', count: 2 },
+      { date: '2023-01-07', count: 3 },
+      { date: '2023-01-08', count: 4 },
+      { date: '2023-01-09', count: 5 },
+    ];
+    const output = renderHeatmap(data, {
+      startDate: '2023-01-01',
+      endDate: '2023-01-20',
+      emojis: ['❌', '🔴', '🟡', '🔵', '🟢'],
+      legend: false,
+    });
+    expect(output).toContain('❌');
+    expect(output).toContain('🟢');
+  });
 });
 
 describe('Grid Computation', () => {
