@@ -1,5 +1,5 @@
 {
-  "name": "terminal-heatmap",
+  "name": "@thisisayande/terminal-heatmap",
   "version": "1.0.0",
   "description": "A highly customizable and scalable contribution heatmap for the terminal, like GitHub's.",
   "type": "module",
