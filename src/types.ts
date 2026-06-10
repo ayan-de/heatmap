@@ -98,4 +98,8 @@ export interface HeatmapOptions {
 
   /** Preset style to use for cells ('classic', 'double-block', 'emoji') */
   preset?: string;
+
+  /** Custom array of 4 or 5 emojis representing cell intensity levels (levels 1-4, or 0-4) */
+  emojis?: string[];
 }
+
