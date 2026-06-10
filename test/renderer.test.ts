@@ -98,6 +98,26 @@ describe('Renderer Core', () => {
     expect(output).toContain('Fri');
     expect(output).toContain('Sat');
   });
+  it('should support double-block preset', () => {
+    const output = renderHeatmap([], {
+      startDate: '2023-01-01',
+      endDate: '2023-01-20',
+      preset: 'double-block',
+      legend: false,
+    });
+    expect(output).toContain('██');
+  });
+
+  it('should support emoji preset and not colorize emojis', () => {
+    const data = [{ date: '2023-01-10', count: 10 }];
+    const output = renderHeatmap(data, {
+      startDate: '2023-01-01',
+      endDate: '2023-01-20',
+      preset: 'emoji',
+      legend: false,
+    });
+    expect(output).toContain('🌱');
+  });
 });
 
 describe('Grid Computation', () => {
