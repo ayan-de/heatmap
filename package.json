@@ -35,7 +35,7 @@
     "console",
     "calendar"
   ],
-  "author": "",
+  "author": "Ayan De",
   "license": "MIT",
   "devDependencies": {
     "@types/node": "^20.19.42",
