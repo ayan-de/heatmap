@@ -154,6 +154,19 @@ describe('Renderer Core', () => {
     expect(output).toContain('❌');
     expect(output).toContain('🟢');
   });
+
+  it('should support custom comma-separated theme strings', () => {
+    const grid = computeHeatmapGrid([], {
+      theme: '#111111,#222222,#333333,#444444,#555555',
+    });
+    expect(grid.themeColors.colors).toEqual([
+      '#111111',
+      '#222222',
+      '#333333',
+      '#444444',
+      '#555555',
+    ]);
+  });
 });
 
 describe('Grid Computation', () => {

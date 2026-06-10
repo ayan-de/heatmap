@@ -20,7 +20,14 @@ function resolveThemeColors(themeOpt?: HeatmapOptions['theme']): ThemeColors {
     return THEMES['github-green'];
   }
   if (typeof themeOpt === 'string') {
-    return THEMES[themeOpt] || THEMES['github-green'];
+    if (THEMES[themeOpt]) {
+      return THEMES[themeOpt];
+    }
+    const splitColors = themeOpt.split(',').map(c => c.trim());
+    if (splitColors.length === 5) {
+      return { colors: splitColors };
+    }
+    return THEMES['github-green'];
   }
   if (themeOpt && Array.isArray(themeOpt.colors) && themeOpt.colors.length === 5) {
     return themeOpt;

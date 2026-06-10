@@ -8,7 +8,7 @@ Visualize activity, habits, tokens, or any daily metrics beautifully in standard
 
 ## Features
 
-- 🎨 **Harmonious Color Themes**: Sleek predefined palettes (`github-green`, `github-dark`, `github-light`, `halloween`, `flame`, `ocean`, `cool`, `purple`, etc.).
+- 🎨 **Harmonious Predefined & Custom Themes**: Sleek predefined palettes (`github-green`, `github-dark`, `github-light`, `halloween`, `flame`, `ocean`, `cool`, `purple`, etc.) or construct your own dynamically!
 - 🕹️ **Interactive Hover TUI (`--interactive`)**: Turn the static text output into an alternate screen buffer console where moving your mouse over cell boxes displays live date and count info.
 - 📦 **Cell Style Presets**: Choose between `classic` (`■`), `double-block` (`██`), or plant-growth `emoji` presets (`⚪🌱🌿🌳🌴`).
 - 🎭 **Custom Emojis**: Supply your own 4-emoji or 5-emoji array to represent intensity levels.
@@ -61,8 +61,11 @@ terminal-heatmap --json data.json --interactive
 ```
 *Press `q`, `Esc`, or `Ctrl+C` to cleanly exit and restore your terminal screen.*
 
-### Preset Styles & Custom Emojis
+### Custom Themes & Cell Presets
 ```bash
+# Apply a custom theme by passing 5 comma-separated hex colors (empty cell to highest intensity)
+terminal-heatmap --json data.json --theme "#1e1b4b,#3b0764,#581c87,#7e22ce,#a855f7"
+
 # Double solid block style
 terminal-heatmap --json data.json --preset double-block
 
@@ -84,7 +87,7 @@ terminal-heatmap --json data.json --emojis "❌,🔴,🟡,🔵,🟢"
 | `--interactive` | `-i` | Enable mouse-hover TUI mode | `false` |
 | `--preset <style>`| | Select cell preset: `classic`, `double-block`, `emoji` | `classic` |
 | `--emojis <list>` | | Comma-separated list of 4 or 5 emojis | |
-| `--theme <name>` | | Theme: `github-green`, `github-dark`, `github-light`, `halloween`, `flame`, `ocean`, `cool`, `purple`, `mono` | `github-green` |
+| `--theme <name\|colors>`| | Predefined theme name or 5 comma-separated hex colors | `github-green` |
 | `--char <char>` | | Explicitly override the cell character symbol | `■` |
 | `--title <text>` | | Add a title above the heatmap | `Contribution Heatmap`|
 | `--start <date>` | | Start date (YYYY-MM-DD) | `1 year ago` |
@@ -110,8 +113,11 @@ const data = [
   { date: '2026-06-02', count: 15 }
 ];
 
+// Passing custom theme colors directly as an object
 const heatmapString = renderHeatmap(data, {
-  theme: 'ocean',
+  theme: {
+    colors: ['#111827', '#312e81', '#3730a3', '#4338ca', '#4f46e5']
+  },
   title: 'My Project Metrics',
   preset: 'double-block',
   startDate: '2026-05-01',

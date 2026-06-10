@@ -28,7 +28,7 @@ async function run() {
   program
     .name('terminal-heatmap')
     .description('Visualize activity and contributions as a beautiful GitHub-like heatmap in your terminal.')
-    .option('--theme <name>', 'Theme to use', 'github-green')
+    .option('--theme <name|colors>', 'Theme name or comma-separated list of 5 hex colors', 'github-green')
     .option('--char <char>', 'Symbol to use for each cell')
     .option('--start <date>', 'Start date (YYYY-MM-DD)')
     .option('--end <date>', 'End date (YYYY-MM-DD)')
