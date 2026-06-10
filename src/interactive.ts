@@ -3,14 +3,13 @@ import { computeHeatmapGrid, renderHeatmap } from './renderer.js';
 import { colorize } from './color.js';
 
 export function startInteractiveHeatmap(data: ContributionData[], options: HeatmapOptions = {}) {
-  const char = options.character || '■';
   const showDayLabels = options.dayLabels !== false;
-  const colWidth = char.length + 1;
   const leftPaddingWidth = showDayLabels ? 4 : 0;
 
   let grid = computeHeatmapGrid(data, options);
   let displayColumns = grid.displayColumns;
   let themeColors = grid.themeColors;
+  const colWidth = grid.preset.charWidth + 1;
 
   const heatmapStr = renderHeatmap(data, options);
   const linesCount = heatmapStr.split('\n').length;
@@ -69,7 +68,7 @@ export function startInteractiveHeatmap(data: ContributionData[], options: Heatm
     const relativeX = x - leftPaddingWidth - 1;
     const c = Math.floor(relativeX / colWidth);
     const remainder = relativeX % colWidth;
-    const insideCell = remainder >= 0 && remainder < char.length;
+    const insideCell = remainder >= 0 && remainder < grid.preset.charWidth;
 
     let hoveredCell = null;
     if (r >= 0 && r < 7 && insideCell && c >= 0 && c < displayColumns.length) {
@@ -89,8 +88,11 @@ export function startInteractiveHeatmap(data: ContributionData[], options: Heatm
       };
       const formattedDate = d.toLocaleDateString('en-US', optionsDate);
       const countText = `${grid.countKey}: ${hoveredCell.count}`;
+      const charForLevel = grid.preset.getChar(hoveredCell.level);
       const cellColor = themeColors.colors[hoveredCell.level];
-      const coloredSquare = colorize(char, cellColor, options.colorMode);
+      const coloredSquare = grid.preset.isEmoji
+        ? charForLevel
+        : colorize(charForLevel, cellColor, options.colorMode);
 
       const infoStr = `\x1b[32m📅 ${formattedDate}\x1b[0m  |  ${coloredSquare} \x1b[1m${countText}\x1b[0m`;
       process.stdout.write(`\x1b[${statusRow};1H\x1b[K${infoStr}`);

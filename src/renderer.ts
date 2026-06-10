@@ -1,5 +1,6 @@
 import { HeatmapOptions, ContributionData, ThemeColors, ContributionMap, Cell, HeatmapGrid } from './types.js';
 import { colorize, THEMES } from './color.js';
+import { resolvePreset } from './presets.js';
 
 /**
  * Format a date object as a local YYYY-MM-DD string key.
@@ -50,7 +51,7 @@ export function computeHeatmapGrid(
   data: ContributionData[],
   options: HeatmapOptions = {}
 ): HeatmapGrid {
-  const character = options.character || '■';
+  const preset = resolvePreset(options.preset, options.character);
   const showDayLabels = options.dayLabels !== false;
   const startDayOfWeek = options.startDayOfWeek ?? 0; // 0 = Sunday, 1 = Monday
   const themeColors = resolveThemeColors(options.theme);
@@ -174,7 +175,7 @@ export function computeHeatmapGrid(
 
   // Responsive logic: slice older columns to fit terminal width
   let displayColumns = columns;
-  const colWidth = character.length + 1; // Width of each cell + space
+  const colWidth = preset.charWidth + 1; // Width of each cell + space
   const leftPaddingWidth = showDayLabels ? 4 : 0;
 
   if (typeof process !== 'undefined' && process.stdout && process.stdout.columns) {
@@ -193,6 +194,7 @@ export function computeHeatmapGrid(
     q50,
     q75,
     countKey,
+    preset,
   };
 }
 
@@ -203,16 +205,15 @@ export function computeHeatmapGrid(
  * @param options Styling and layout configurations
  */
 export function renderHeatmap(data: ContributionData[], options: HeatmapOptions = {}): string {
-  const character = options.character || '■';
   const showLegend = options.legend !== false;
   const showMonthLabels = options.monthLabels !== false;
   const showDayLabels = options.dayLabels !== false;
   const startDayOfWeek = options.startDayOfWeek ?? 0; // 0 = Sunday, 1 = Monday
   const colorMode = options.colorMode;
 
-  const { displayColumns, themeColors } = computeHeatmapGrid(data, options);
+  const { displayColumns, themeColors, preset } = computeHeatmapGrid(data, options);
 
-  const colWidth = character.length + 1; // Width of each cell + space
+  const colWidth = preset.charWidth + 1; // Width of each cell + space
   const leftPaddingWidth = showDayLabels ? 4 : 0;
   const leftPaddingStr = ' '.repeat(leftPaddingWidth);
 
@@ -271,8 +272,13 @@ export function renderHeatmap(data: ContributionData[], options: HeatmapOptions 
       if (cell.level === -1) {
         rowStr += ' '.repeat(colWidth);
       } else {
-        const color = themeColors.colors[cell.level];
-        rowStr += colorize(character, color, colorMode) + ' ';
+        const charForLevel = preset.getChar(cell.level);
+        if (preset.isEmoji) {
+          rowStr += charForLevel + ' ';
+        } else {
+          const color = themeColors.colors[cell.level];
+          rowStr += colorize(charForLevel, color, colorMode) + ' ';
+        }
       }
     }
 
@@ -283,12 +289,19 @@ export function renderHeatmap(data: ContributionData[], options: HeatmapOptions 
   if (showLegend) {
     const legendLabel = 'Less ';
     const legendCells = [0, 1, 2, 3, 4]
-      .map(lvl => colorize(character, themeColors.colors[lvl], colorMode))
+      .map(lvl => {
+        const charForLevel = preset.getChar(lvl);
+        if (preset.isEmoji) {
+          return charForLevel;
+        } else {
+          return colorize(charForLevel, themeColors.colors[lvl], colorMode);
+        }
+      })
       .join(' ');
     const legendText = `${legendLabel}${legendCells} More`;
     
     const totalGridWidth = displayColumns.length * colWidth;
-    const rawLegendLen = legendLabel.length + (5 * character.length + 4) + 5;
+    const rawLegendLen = legendLabel.length + (5 * preset.charWidth + 4) + 5;
     const padding = Math.max(0, totalGridWidth - rawLegendLen);
     
     lines.push('');
