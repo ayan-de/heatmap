@@ -1,13 +1,5 @@
-import { HeatmapOptions, ContributionData, ThemeColors, ContributionMap } from './types.js';
+import { HeatmapOptions, ContributionData, ThemeColors, ContributionMap, Cell, HeatmapGrid } from './types.js';
 import { colorize, THEMES } from './color.js';
-
-interface Cell {
-  date: Date;
-  dateStr: string;
-  inRange: boolean;
-  count: number;
-  level: number; // -1 (out of range), 0 (none), 1-4 (intensity)
-}
 
 /**
  * Format a date object as a local YYYY-MM-DD string key.
@@ -36,19 +28,33 @@ function resolveThemeColors(themeOpt?: HeatmapOptions['theme']): ThemeColors {
 }
 
 /**
- * Renders a contribution heatmap in the terminal.
- * 
- * @param data Array of contributions containing dates and counts
- * @param options Styling and layout configurations
+ * Automatically detects the field representing count/value in the input JSON objects.
+ * Looks for any key that is not 'date'.
  */
-export function renderHeatmap(data: ContributionData[], options: HeatmapOptions = {}): string {
+export function detectCountKey(data: ContributionData[]): string {
+  for (const item of data) {
+    if (!item) continue;
+    const keys = Object.keys(item);
+    const found = keys.find(k => k !== 'date');
+    if (found) {
+      return found;
+    }
+  }
+  return 'count'; // Fallback
+}
+
+/**
+ * Computes the grid layout, levels, and colors for a heatmap.
+ */
+export function computeHeatmapGrid(
+  data: ContributionData[],
+  options: HeatmapOptions = {}
+): HeatmapGrid {
   const character = options.character || '■';
-  const showLegend = options.legend !== false;
-  const showMonthLabels = options.monthLabels !== false;
   const showDayLabels = options.dayLabels !== false;
   const startDayOfWeek = options.startDayOfWeek ?? 0; // 0 = Sunday, 1 = Monday
   const themeColors = resolveThemeColors(options.theme);
-  const colorMode = options.colorMode;
+  const countKey = options.countKey || detectCountKey(data);
 
   // 1. Build a lookup map of contribution counts
   const contributionMap: ContributionMap = {};
@@ -57,7 +63,8 @@ export function renderHeatmap(data: ContributionData[], options: HeatmapOptions 
     const d = typeof item.date === 'string' ? new Date(item.date) : item.date;
     if (isNaN(d.getTime())) continue;
     const dateStr = formatDateKey(d);
-    contributionMap[dateStr] = (contributionMap[dateStr] || 0) + item.count;
+    const val = Number(item[countKey]) || 0;
+    contributionMap[dateStr] = (contributionMap[dateStr] || 0) + val;
   }
 
   // 2. Resolve start/end dates
@@ -169,7 +176,6 @@ export function renderHeatmap(data: ContributionData[], options: HeatmapOptions 
   let displayColumns = columns;
   const colWidth = character.length + 1; // Width of each cell + space
   const leftPaddingWidth = showDayLabels ? 4 : 0;
-  const leftPaddingStr = ' '.repeat(leftPaddingWidth);
 
   if (typeof process !== 'undefined' && process.stdout && process.stdout.columns) {
     const termColumns = process.stdout.columns;
@@ -178,6 +184,38 @@ export function renderHeatmap(data: ContributionData[], options: HeatmapOptions 
       displayColumns = displayColumns.slice(displayColumns.length - maxVisibleCols);
     }
   }
+
+  return {
+    columns,
+    displayColumns,
+    themeColors,
+    q25,
+    q50,
+    q75,
+    countKey,
+  };
+}
+
+/**
+ * Renders a contribution heatmap in the terminal.
+ * 
+ * @param data Array of contributions containing dates and counts
+ * @param options Styling and layout configurations
+ */
+export function renderHeatmap(data: ContributionData[], options: HeatmapOptions = {}): string {
+  const character = options.character || '■';
+  const showLegend = options.legend !== false;
+  const showMonthLabels = options.monthLabels !== false;
+  const showDayLabels = options.dayLabels !== false;
+  const startDayOfWeek = options.startDayOfWeek ?? 0; // 0 = Sunday, 1 = Monday
+  const colorMode = options.colorMode;
+
+  const { displayColumns, themeColors } = computeHeatmapGrid(data, options);
+
+  const colWidth = character.length + 1; // Width of each cell + space
+  const leftPaddingWidth = showDayLabels ? 4 : 0;
+  const leftPaddingStr = ' '.repeat(leftPaddingWidth);
+
 
   const lines: string[] = [];
 

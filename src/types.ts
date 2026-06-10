@@ -1,14 +1,33 @@
 export interface ContributionData {
   date: Date | string;
-  count: number;
+  [key: string]: any;
 }
 
 export type ContributionMap = Record<string, number>;
+
+export interface Cell {
+  date: Date;
+  dateStr: string;
+  inRange: boolean;
+  count: number;
+  level: number; // -1 (out of range), 0 (none), 1-4 (intensity)
+}
 
 export interface ThemeColors {
   /** Array of exactly 5 colors: index 0 (empty) to 4 (highest intensity) */
   colors: string[];
 }
+
+export interface HeatmapGrid {
+  columns: Cell[][];
+  displayColumns: Cell[][];
+  themeColors: ThemeColors;
+  q25: number;
+  q50: number;
+  q75: number;
+  countKey: string;
+}
+
 
 export type ThemeName =
   | 'github-green'
@@ -66,4 +85,7 @@ export interface HeatmapOptions {
   
   /** Start day of week: 0 for Sunday, 1 for Monday. Defaults to 0. */
   startDayOfWeek?: 0 | 1;
+  
+  /** The key in the JSON objects representing the count/value. Defaults to auto-detected or 'count'. */
+  countKey?: string;
 }
