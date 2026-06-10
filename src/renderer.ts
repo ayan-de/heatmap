@@ -51,7 +51,7 @@ export function computeHeatmapGrid(
   data: ContributionData[],
   options: HeatmapOptions = {}
 ): HeatmapGrid {
-  const preset = resolvePreset(options.preset, options.character);
+  const preset = resolvePreset(options.preset, options.character, options.emojis);
   const showDayLabels = options.dayLabels !== false;
   const startDayOfWeek = options.startDayOfWeek ?? 0; // 0 = Sunday, 1 = Monday
   const themeColors = resolveThemeColors(options.theme);

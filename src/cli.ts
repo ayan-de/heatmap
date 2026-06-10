@@ -40,6 +40,7 @@ async function run() {
     .option('--all-days', 'Show labels for all days of the week (defaults to Mon/Wed/Fri only)')
     .option('-i, --interactive', 'Interactive mode with mouse hover support')
     .option('--preset <preset>', 'Cell preset style: classic, double-block, emoji')
+    .option('--emojis <list>', 'Custom comma-separated list of 4 or 5 emojis (e.g. "⚪,🌱,🌿,🌳,🌴" or "🌱,🌿,🌳,🌴")')
     .requiredOption('--json <file>', 'Load contribution data from a JSON file (format: [{"date":"YYYY-MM-DD","count":number}]) — pass "-" to read from stdin');
 
   const opts = program.parse(process.argv).opts();
@@ -71,6 +72,11 @@ async function run() {
       }
     }
 
+    let customEmojis: string[] | undefined = undefined;
+    if (opts.emojis) {
+      customEmojis = opts.emojis.split(',').map((s: string) => s.trim());
+    }
+
     const heatmapOptions = {
       startDate: renderStart,
       endDate: renderEnd,
@@ -83,6 +89,7 @@ async function run() {
       title: opts.title ?? 'Contribution Heatmap',
       startDayOfWeek: (opts.monday ? 1 : 0) as 0 | 1,
       preset: opts.preset,
+      emojis: customEmojis,
     };
 
     if (opts.interactive) {
