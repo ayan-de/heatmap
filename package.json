@@ -1,6 +1,6 @@
 {
   "name": "@thisisayande/terminal-heatmap",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "description": "A highly customizable and scalable contribution heatmap for the terminal, like GitHub's.",
   "type": "module",
   "main": "./dist/index.cjs",
