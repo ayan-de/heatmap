@@ -106,8 +106,11 @@ export function startInteractiveHeatmap(data: ContributionData[], options: Heatm
   const onData = (chunk: any) => {
     const str = chunk.toString();
 
-    // Check for exit keys: Ctrl+C (charCode 3), standalone Escape (charCode 27), 'q', 'Q'
-    if (str === '\x1b' || str === 'q' || str === 'Q' || str.includes('\x03')) {
+    // Exit keys can arrive batched into the same chunk as mouse-motion reports
+    // (mouse tracking floods stdin), so scan for them instead of requiring the
+    // chunk to equal the key exactly. Ctrl+C is 0x03; 'q'/'Q' quit. Mouse SGR
+    // sequences only contain digits, ';', and 'M'/'m', so these never collide.
+    if (str.includes('\x03') || str.includes('q') || str.includes('Q')) {
       cleanup();
       resolve();
       return;
@@ -126,6 +129,15 @@ export function startInteractiveHeatmap(data: ContributionData[], options: Heatm
 
     // Clean up parsed sequences from the buffer
     stdinBuffer = stdinBuffer.replace(/\x1b\[<(\d+);(\d+);(\d+)[Mm]/g, '');
+
+    // A standalone Escape means quit. After stripping complete mouse sequences,
+    // an ESC not followed by '[' is the Escape key (an ESC followed by '[' is a
+    // partial CSI/mouse sequence still awaiting the rest of its bytes).
+    if (/\x1b(?!\[)/.test(stdinBuffer)) {
+      cleanup();
+      resolve();
+      return;
+    }
 
     // Keep buffer bounded
     if (stdinBuffer.length > 1000) {
